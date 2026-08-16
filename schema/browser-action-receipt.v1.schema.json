@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/scalar-atelier/browser-action-receipt/blob/main/schema/browser-action-receipt.v1.schema.json",
+  "title": "BrowserActionReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "operationId",
+    "action",
+    "riskClass",
+    "approval",
+    "target",
+    "result",
+    "preparedAt",
+    "finalizedAt",
+    "receiptSha256"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "browser-action-receipt/v1" },
+    "operationId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "action": { "enum": ["click", "type", "select", "submit"] },
+    "riskClass": { "enum": ["R0", "R1", "R2", "R3"] },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "channel", "decidedAt", "bindingSha256"],
+      "properties": {
+        "decision": { "enum": ["approved", "denied", "expired", "invalid"] },
+        "channel": { "type": ["string", "null"], "enum": ["host", "native", null] },
+        "decidedAt": {
+          "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }]
+        },
+        "bindingSha256": { "$ref": "#/$defs/sha256" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "decision": { "const": "invalid" } } },
+          "then": {
+            "properties": {
+              "channel": { "type": "null" },
+              "decidedAt": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "channel": { "enum": ["host", "native"] },
+              "decidedAt": { "$ref": "#/$defs/timestamp" }
+            }
+          }
+        }
+      ]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["origin", "pathnameSha256", "fingerprintSha256", "pageGenerationSha256"],
+      "properties": {
+        "origin": { "type": "string", "maxLength": 512, "pattern": "^https?://" },
+        "pathnameSha256": { "$ref": "#/$defs/sha256" },
+        "fingerprintSha256": { "$ref": "#/$defs/sha256" },
+        "pageGenerationSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "errorCode",
+        "artifactRefSha256",
+        "contentHash",
+        "evidenceStatus",
+        "evidenceErrorCode"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["committed", "blocked", "aborted_target_changed", "unknown_after_claim", "unknown_after_adapter"]
+        },
+        "errorCode": {
+          "enum": [null, "approval_required", "approval_invalid", "approval_expired", "approval_denied", "clock_invalid", "target_changed", "adapter_threw", "adapter_contract_violation", "unknown_after_claim"]
+        },
+        "artifactRefSha256": {
+          "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+        },
+        "contentHash": {
+          "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+        },
+        "evidenceStatus": { "enum": ["captured", "not_requested", "capture_failed"] },
+        "evidenceErrorCode": { "enum": [null, "capture_failed"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "committed" } } },
+          "then": { "properties": { "errorCode": { "type": "null" } } },
+          "else": { "properties": { "errorCode": { "type": "string" } } }
+        },
+        {
+          "if": { "properties": { "evidenceStatus": { "const": "captured" } } },
+          "then": {
+            "properties": {
+              "artifactRefSha256": { "$ref": "#/$defs/sha256" },
+              "contentHash": { "$ref": "#/$defs/sha256" },
+              "evidenceErrorCode": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "artifactRefSha256": { "type": "null" },
+              "contentHash": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "evidenceStatus": { "const": "capture_failed" } } },
+          "then": { "properties": { "evidenceErrorCode": { "const": "capture_failed" } } },
+          "else": { "properties": { "evidenceErrorCode": { "type": "null" } } }
+        },
+        {
+          "if": { "properties": { "status": { "const": "blocked" } } },
+          "then": {
+            "properties": {
+              "errorCode": { "enum": ["approval_required", "approval_invalid", "approval_expired", "approval_denied", "clock_invalid"] }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "aborted_target_changed" } } },
+          "then": { "properties": { "errorCode": { "const": "target_changed" } } }
+        },
+        {
+          "if": { "properties": { "status": { "const": "unknown_after_claim" } } },
+          "then": { "properties": { "errorCode": { "const": "unknown_after_claim" } } }
+        },
+        {
+          "if": { "properties": { "status": { "const": "unknown_after_adapter" } } },
+          "then": {
+            "properties": {
+              "errorCode": { "enum": ["adapter_threw", "adapter_contract_violation"] }
+            }
+          }
+        }
+      ]
+    },
+    "preparedAt": { "$ref": "#/$defs/timestamp" },
+    "finalizedAt": { "$ref": "#/$defs/timestamp" },
+    "receiptSha256": { "$ref": "#/$defs/sha256" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "result": {
+            "type": "object",
+            "properties": {
+              "status": { "enum": ["committed", "aborted_target_changed", "unknown_after_adapter"] }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "approval": { "type": "object", "properties": { "decision": { "const": "approved" } } }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result": { "type": "object", "properties": { "status": { "const": "blocked" } } }
+        }
+      },
+      "then": {
+        "properties": {
+          "approval": { "type": "object", "properties": { "decision": { "enum": ["denied", "expired", "invalid"] } } }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result": { "type": "object", "properties": { "evidenceStatus": { "enum": ["captured", "capture_failed"] } } }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": { "type": "object", "properties": { "status": { "const": "committed" } } }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    }
+  }
+}

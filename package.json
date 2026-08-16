@@ -1,0 +1,60 @@
+{
+  "name": "@scalar-atelier/browser-action-receipt",
+  "version": "0.1.0",
+  "description": "Fail-closed approval-to-browser-action binding with privacy-minimal receipts.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schema/browser-action-receipt.v1.json": "./schema/browser-action-receipt.v1.schema.json"
+  },
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "bin": {
+    "browser-action-receipt": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "schema",
+    "docs/CLAIMS_AND_LIMITATIONS.md",
+    "docs/ORIGIN.md",
+    "docs/THREAT_MODEL.md",
+    "README.md",
+    "SECURITY.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "node ./scripts/clean.mjs",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "npm run typecheck",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "demo": "npm run build && node example/playwright-demo.mjs",
+    "package:check": "npm run build && node scripts/assert-package.mjs",
+    "dco:check": "node scripts/check-dco.mjs",
+    "verify": "npm run lint && npm test && npm run demo && npm run package:check",
+    "prepack": "npm run clean && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scalar-atelier/browser-action-receipt.git"
+  },
+  "bugs": {
+    "url": "https://github.com/scalar-atelier/browser-action-receipt/issues"
+  },
+  "homepage": "https://github.com/scalar-atelier/browser-action-receipt#readme",
+  "license": "MIT",
+  "author": "SCALAR Atelier Co., Ltd.",
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "ajv": "^8.20.0",
+    "playwright": "^1.55.0",
+    "typescript": "^5.8.3"
+  }
+}
