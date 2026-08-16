@@ -25,11 +25,10 @@ import {
   assertSha256,
   canonicalJson,
   cloneFrozenJson,
-  equalSha256,
   isoNow,
-  sha256Hex,
 } from "./canonical.js";
-import { FileReceiptLedger } from "./ledger.js";
+import { equalSha256, sha256Hex } from "./node-crypto.js";
+import type { ReceiptLedger } from "./ledger-contract.js";
 import { assertTargetObservation, observationsMatch, receiptTarget } from "./receipt.js";
 
 const ACTION_SET = new Set<string>(ACTIONS);
@@ -75,7 +74,7 @@ export interface ExecutePreparedActionInput {
   readonly prepared: PreparedActionHandle;
   readonly decision?: ApprovalDecisionV1;
   readonly adapter: AtomicActionAdapter;
-  readonly ledger: FileReceiptLedger;
+  readonly ledger: ReceiptLedger;
   readonly capture?: CaptureEvidence;
   readonly now?: Date;
 }
@@ -117,7 +116,7 @@ export function createTargetObservation(input: CreateObservationInput): TargetOb
   if (typeof input.targetFingerprint !== "string" || input.targetFingerprint.length === 0) {
     throw new ContractError("fingerprint_invalid", "targetFingerprint must not be empty");
   }
-  if (Buffer.byteLength(input.targetFingerprint, "utf8") > MAX_FINGERPRINT_BYTES) {
+  if (new TextEncoder().encode(input.targetFingerprint).byteLength > MAX_FINGERPRINT_BYTES) {
     throw new ContractError("fingerprint_invalid", "targetFingerprint is too large");
   }
   if (

@@ -1,5 +1,3 @@
-import { createHash, timingSafeEqual } from "node:crypto";
-import { Buffer } from "node:buffer";
 import type { JsonValue } from "./contract.js";
 
 const MAX_DEPTH = 32;
@@ -82,7 +80,7 @@ function encode(value: unknown, depth: number, seen: Set<object>): string {
 
 export function canonicalJson(value: unknown): string {
   const result = encode(value, 0, new Set());
-  if (Buffer.byteLength(result, "utf8") > MAX_CANONICAL_BYTES) {
+  if (new TextEncoder().encode(result).byteLength > MAX_CANONICAL_BYTES) {
     throw new ContractError("json_too_large", `Canonical JSON exceeds ${MAX_CANONICAL_BYTES} bytes`);
   }
   return result;
@@ -102,19 +100,10 @@ export function cloneFrozenJson(value: unknown): JsonValue {
   return deepFreeze(JSON.parse(canonicalJson(value)) as JsonValue);
 }
 
-export function sha256Hex(value: string | Uint8Array): string {
-  return createHash("sha256").update(value).digest("hex");
-}
-
 export function assertSha256(value: unknown, field: string): asserts value is string {
   if (typeof value !== "string" || !HEX_SHA256.test(value)) {
     throw new ContractError("sha256_invalid", `${field} must be lowercase SHA-256 hex`);
   }
-}
-
-export function equalSha256(left: string, right: string): boolean {
-  if (!HEX_SHA256.test(left) || !HEX_SHA256.test(right)) return false;
-  return timingSafeEqual(Buffer.from(left, "hex"), Buffer.from(right, "hex"));
 }
 
 export function assertIsoTimestamp(value: unknown, field: string): asserts value is string {

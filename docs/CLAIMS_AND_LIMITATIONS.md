@@ -1,6 +1,6 @@
 # Claims and limitations
 
-## Claims earned by v0.1.0 tests
+## Claims earned by v0.2.0 tests
 
 The claim is conditional: **given a conforming atomic adapter and a trusted approval host**, the library will not ask that adapter to execute when approval is missing/invalid/expired, the operation was already claimed, or the adapter reports that the prepared DOM target changed. Every v0.1 action requires approval; risk labels never bypass it.
 
@@ -17,6 +17,8 @@ Each claim maps to a deterministic check:
 | Crash ambiguity is not retried | unknown-claim recovery case |
 | Receipt omits sensitive source material | privacy canary case |
 | Receipt alteration is detected | hash-tamper case |
+| Node and Web Crypto builds accept the same receipt bytes | public golden-vector cases |
+| A host store cannot supply an unverified duplicate receipt | browser store contract case |
 
 ## Explicit non-claims
 

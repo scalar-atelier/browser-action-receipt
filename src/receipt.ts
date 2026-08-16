@@ -12,9 +12,8 @@ import {
   assertOperationId,
   assertSha256,
   canonicalJson,
-  equalSha256,
-  sha256Hex,
 } from "./canonical.js";
+import { equalSha256, sha256Hex } from "./node-crypto.js";
 
 const ACTION_SET = new Set<string>(ACTIONS);
 const RISK_SET = new Set<string>(RISK_CLASSES);
