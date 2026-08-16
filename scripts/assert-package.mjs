@@ -11,8 +11,9 @@ assert.equal(Object.keys(lock.packages?.[""]?.dependencies ?? {}).length, 0, "lo
 assert.equal(packageJson.private, true, "staging package must stay private until the publish gate");
 assert.equal(packageJson.engines?.node, ">=22");
 
-const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-const { stdout } = await execFileAsync(npm, ["pack", "--dry-run", "--json", "--ignore-scripts"], {
+const npmCli = process.env.npm_execpath;
+assert(npmCli, "package:check must run through npm");
+const { stdout } = await execFileAsync(process.execPath, [npmCli, "pack", "--dry-run", "--json", "--ignore-scripts"], {
   encoding: "utf8",
   maxBuffer: 2 * 1024 * 1024,
 });
