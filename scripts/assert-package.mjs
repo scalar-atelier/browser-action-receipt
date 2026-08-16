@@ -30,8 +30,11 @@ for (const required of [
   "docs/THREAT_MODEL.md",
   "dist/index.js",
   "dist/index.d.ts",
+  "dist/browser.js",
+  "dist/browser.d.ts",
   "dist/cli.js",
   "schema/browser-action-receipt.v1.schema.json",
+  "schema/golden-vectors.v1.json",
 ]) {
   assert(files.has(required), `tarball is missing ${required}`);
 }

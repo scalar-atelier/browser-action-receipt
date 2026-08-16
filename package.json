@@ -1,6 +1,6 @@
 {
   "name": "@scalar-atelier/browser-action-receipt",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Fail-closed approval-to-browser-action binding with privacy-minimal receipts.",
   "publishConfig": {
     "access": "public"
@@ -14,7 +14,12 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./schema/browser-action-receipt.v1.json": "./schema/browser-action-receipt.v1.schema.json"
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    },
+    "./schema/browser-action-receipt.v1.json": "./schema/browser-action-receipt.v1.schema.json",
+    "./schema/golden-vectors.v1.json": "./schema/golden-vectors.v1.json"
   },
   "types": "./dist/index.d.ts",
   "sideEffects": false,

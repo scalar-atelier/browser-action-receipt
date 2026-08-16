@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "browser-action-receipt-golden-vectors/v1",
+  "vectors": [
+    {
+      "name": "committed-with-captured-evidence",
+      "seed": {
+        "schemaVersion": "browser-action-claim/v1",
+        "operationId": "00000000-0000-4000-8000-000000000099",
+        "action": "click",
+        "riskClass": "R2",
+        "approval": {
+          "decision": "approved",
+          "channel": "host",
+          "decidedAt": "2026-08-16T00:00:01.000Z",
+          "bindingSha256": "1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "target": {
+          "origin": "https://example.test",
+          "pathnameSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+          "fingerprintSha256": "3333333333333333333333333333333333333333333333333333333333333333",
+          "pageGenerationSha256": "4444444444444444444444444444444444444444444444444444444444444444"
+        },
+        "preparedAt": "2026-08-16T00:00:00.000Z",
+        "claimedAt": "2026-08-16T00:00:01.500Z"
+      },
+      "result": {
+        "status": "committed",
+        "errorCode": null,
+        "artifactRefSha256": "5555555555555555555555555555555555555555555555555555555555555555",
+        "contentHash": "6666666666666666666666666666666666666666666666666666666666666666",
+        "evidenceStatus": "captured"
+      },
+      "finalizedAt": "2026-08-16T00:00:02.000Z",
+      "receipt": {
+        "schemaVersion": "browser-action-receipt/v1",
+        "operationId": "00000000-0000-4000-8000-000000000099",
+        "action": "click",
+        "riskClass": "R2",
+        "approval": {
+          "decision": "approved",
+          "channel": "host",
+          "decidedAt": "2026-08-16T00:00:01.000Z",
+          "bindingSha256": "1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "target": {
+          "origin": "https://example.test",
+          "pathnameSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+          "fingerprintSha256": "3333333333333333333333333333333333333333333333333333333333333333",
+          "pageGenerationSha256": "4444444444444444444444444444444444444444444444444444444444444444"
+        },
+        "result": {
+          "status": "committed",
+          "errorCode": null,
+          "artifactRefSha256": "5555555555555555555555555555555555555555555555555555555555555555",
+          "contentHash": "6666666666666666666666666666666666666666666666666666666666666666",
+          "evidenceStatus": "captured",
+          "evidenceErrorCode": null
+        },
+        "preparedAt": "2026-08-16T00:00:00.000Z",
+        "finalizedAt": "2026-08-16T00:00:02.000Z",
+        "receiptSha256": "09e047a8cdb81c854b7a79ed8ae503e2e904ed9b86072f2c340418ff907793ea"
+      }
+    }
+  ]
+}

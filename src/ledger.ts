@@ -23,18 +23,15 @@ import {
   parseReceipt,
   type ReceiptResultInput,
 } from "./receipt.js";
+import type {
+  ClaimHandle,
+  ClaimOutcome,
+  ReceiptLedger,
+} from "./ledger-contract.js";
+
+export type { ClaimHandle, ClaimOutcome, ReceiptLedger } from "./ledger-contract.js";
 
 const MAX_LEDGER_FILE_BYTES = 64 * 1024;
-
-export interface ClaimHandle {
-  readonly operationId: string;
-}
-
-export type ClaimOutcome =
-  | { readonly kind: "claimed"; readonly handle: ClaimHandle }
-  | { readonly kind: "duplicate_final"; readonly receipt: BrowserActionReceiptV1 }
-  | { readonly kind: "duplicate_in_progress"; readonly operationId: string }
-  | { readonly kind: "operation_conflict"; readonly operationId: string };
 
 interface ClaimHandleState {
   readonly ledger: FileReceiptLedger;
@@ -137,7 +134,7 @@ async function readSmallFile(path: string): Promise<string> {
   return readFile(path, "utf8");
 }
 
-export class FileReceiptLedger {
+export class FileReceiptLedger implements ReceiptLedger {
   readonly root: string;
   readonly claimsDirectory: string;
   readonly receiptsDirectory: string;

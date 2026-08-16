@@ -4,7 +4,7 @@
 
 `browser-action-receipt` is a small TypeScript trust primitive for DOM-target browser actions. It binds one prepared action, payload, target observation, and approval decision; claims the operation once; delegates one atomic compare-and-act call; and writes a privacy-minimal terminal receipt.
 
-**Status:** public release `v0.1.1`. It is not a security boundary by itself.
+**Status:** `v0.2.0`. It is not a security boundary by itself.
 
 ## What it does
 
@@ -20,7 +20,7 @@
 - make a non-atomic adapter safe—the adapter must compare and act inside one browser execution context;
 - secure coordinate-based computer use;
 - prevent a malicious local user from rewriting a receipt and recomputing its unkeyed hash;
-- provide legal non-repudiation, prompt-injection protection, a browser runtime, or cloud storage.
+- provide legal non-repudiation, prompt-injection protection, a DOM adapter, or cloud storage.
 
 See [claims and limitations](docs/CLAIMS_AND_LIMITATIONS.md) and the [threat model](docs/THREAT_MODEL.md) before integrating it.
 
@@ -47,10 +47,10 @@ Node.js 22 or newer is required. Runtime dependency count is zero; Playwright an
 ## Minimal host flow
 
 ```ts
-const target = createTargetObservation({
+const target = await createTargetObservation({
   url: page.url(), targetFingerprint, pageGeneration,
 });
-const prepared = prepareAction({
+const prepared = await prepareAction({
   action: "click", riskClass: "R2", observation: target, payload: { ref: "b1" },
   approvalDisplay: { title: "Publish draft", detail: "Submit this draft to example.test" },
 });
@@ -59,6 +59,21 @@ const outcome = await executePreparedAction({ prepared, decision, adapter, ledge
 ```
 
 The adapter, not this library, must implement `atomic-compare-and-act/v1`. A correct DOM adapter re-finds the target, reconstructs the fingerprint, compares it with the prepared target, and invokes the action in the same browser task. If it cannot provide that seam, it must not declare the capability.
+
+Use the async Web Crypto build in a browser or Tauri webview:
+
+```ts
+import {
+  BrowserReceiptLedger,
+  createTargetObservation,
+  executePreparedAction,
+  prepareAction,
+} from "@scalar-atelier/browser-action-receipt/browser";
+
+const ledger = new BrowserReceiptLedger(tauriReceiptStore);
+```
+
+`tauriReceiptStore` only atomically claims and publishes opaque package-built values. Receipt assembly and verification stay inside this package. Both runtime entries consume the same public schema and [`golden-vectors.v1.json`](schema/golden-vectors.v1.json).
 
 ## Receipt shape
 
@@ -92,7 +107,7 @@ The CLI prints stable status codes, not receipt contents or browser data.
 
 ## Integration boundary
 
-The host must render the library-provided action, risk, origin, title, and detail without hiding or rewriting them. The library binds those fields to the payload, but it cannot determine whether host-authored wording truthfully describes arbitrary payload semantics. Risk classification is also host-owned and informational in v0.1; it never bypasses approval. The official demo compares origin, pathname, page generation, and target fingerprint synchronously with the action in one page task.
+The host must render the library-provided action, risk, origin, title, and detail without hiding or rewriting them. The library binds those fields to the payload, but it cannot determine whether host-authored wording truthfully describes arbitrary payload semantics. Risk classification is also host-owned and informational; it never bypasses approval. The official demo compares origin, pathname, page generation, and target fingerprint synchronously with the action in one page task.
 
 ## Security and contributions
 

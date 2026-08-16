@@ -19,8 +19,8 @@ export {
 export {
   ContractError,
   canonicalJson,
-  sha256Hex,
 } from "./canonical.js";
+export { sha256Hex } from "./node-crypto.js";
 export {
   createTargetObservation,
   executePreparedAction,
@@ -31,4 +31,5 @@ export {
   type PrepareActionInput,
 } from "./guard.js";
 export { FileReceiptLedger } from "./ledger.js";
+export type { ClaimHandle, ClaimOutcome, ReceiptLedger } from "./ledger-contract.js";
 export { assertReceipt, parseReceipt } from "./receipt.js";
