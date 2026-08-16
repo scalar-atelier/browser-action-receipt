@@ -12,7 +12,7 @@ We will acknowledge a valid report within two business days. This is a response 
 
 ## Supported versions
 
-No public version is supported while the repository is private staging. After `v0.1.0`, only the latest released minor line will receive security fixes until a broader policy is published.
+Only the latest released `v0.1.x` version receives security fixes until a broader policy is published.
 
 ## Scope
 
