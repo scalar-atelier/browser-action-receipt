@@ -4,7 +4,7 @@
 
 `browser-action-receipt` is a small TypeScript trust primitive for DOM-target browser actions. It binds one prepared action, payload, target observation, and approval decision; claims the operation once; delegates one atomic compare-and-act call; and writes a privacy-minimal terminal receipt.
 
-**Status:** public source release `v0.1.0`. It is not published to npm and is not a security boundary by itself.
+**Status:** public release `v0.1.1`. It is not a security boundary by itself.
 
 ## What it does
 
@@ -25,6 +25,14 @@
 See [claims and limitations](docs/CLAIMS_AND_LIMITATIONS.md) and the [threat model](docs/THREAT_MODEL.md) before integrating it.
 
 ## Verify the source checkout
+
+Install the package:
+
+```sh
+npm install @scalar-atelier/browser-action-receipt
+```
+
+Or verify the source checkout:
 
 ```sh
 git clone https://github.com/scalar-atelier/browser-action-receipt.git

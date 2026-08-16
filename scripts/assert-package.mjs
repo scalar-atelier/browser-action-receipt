@@ -8,7 +8,9 @@ const packageJson = JSON.parse(await readFile(new URL("../package.json", import.
 const lock = JSON.parse(await readFile(new URL("../package-lock.json", import.meta.url), "utf8"));
 assert.equal(Object.keys(packageJson.dependencies ?? {}).length, 0, "runtime dependencies must remain zero");
 assert.equal(Object.keys(lock.packages?.[""]?.dependencies ?? {}).length, 0, "lockfile gained runtime dependencies");
-assert.equal(packageJson.private, true, "staging package must stay private until the publish gate");
+assert.notEqual(packageJson.private, true, "public package cannot be marked private");
+assert.equal(packageJson.publishConfig?.access, "public", "scoped package must publish as public");
+assert.equal(packageJson.bin?.["browser-action-receipt"], "dist/cli.js", "CLI bin path must be npm-normalized");
 assert.equal(packageJson.engines?.node, ">=22");
 
 const npmCli = process.env.npm_execpath;
