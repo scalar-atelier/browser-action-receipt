@@ -1,6 +1,8 @@
 name: verify
 
 on:
+  push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -21,6 +23,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run dco:check -- origin/${{ github.base_ref }}
+      - name: Check pull request sign-offs
+        if: github.event_name == 'pull_request'
+        env:
+          DCO_BASE_REF: ${{ github.base_ref }}
+        run: npm run dco:check -- "origin/$DCO_BASE_REF"
       - run: npx playwright install --with-deps chromium
       - run: npm run verify

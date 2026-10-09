@@ -11,6 +11,7 @@ Each claim maps to a deterministic check:
 | Claim | Check |
 |---|---|
 | Every supported mutation requires approval | `guard.test.mjs` R1/missing/denied/expired cases |
+| Approval expires during a slow claim or the clock rolls back | Node and browser time-boundary tests: zero adapter calls, persisted terminal receipt |
 | Approval cannot move to another operation or payload | binding and mutation cases |
 | One operation causes at most one adapter invocation | concurrent ledger case |
 | Changed target does not invoke the fixture action | stable/swapped Playwright demo |
@@ -46,3 +47,5 @@ The local receipt hash detects accidental or unsophisticated alteration only. An
 ## Atomicity caveat
 
 The library can validate adapter outputs but cannot retroactively stop a dishonest adapter that acts before comparing. A `committed` result whose returned observation differs is stored as `unknown_after_adapter`, because the external side effect may already exist. Integration review must therefore inspect the adapter's compare-and-act implementation, not merely its capability string.
+
+Approval time is checked again after claim persistence, immediately before the adapter call. The optional `now` test hook anchors the starting time; elapsed claim time still counts. A previously approved claim can therefore finish with an expired/invalid approval projection and a `blocked` result. The receipt schema and claim identity remain unchanged. This does not establish a deadline for work performed inside an adapter after invocation.

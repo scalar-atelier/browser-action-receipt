@@ -503,7 +503,13 @@ async function buildReceipt(
     operationId: seed.operationId,
     action: seed.action,
     riskClass: seed.riskClass,
-    approval: seed.approval,
+    // A valid claim can expire (or lose its clock) before any adapter is invoked.
+    approval: seed.approval.decision === "approved" && resultInput.status === "blocked"
+      && ["approval_expired", "clock_invalid"].includes(resultInput.errorCode ?? "")
+      ? resultInput.errorCode === "approval_expired"
+        ? { ...seed.approval, decision: "expired" as const }
+        : { ...seed.approval, decision: "invalid" as const, channel: null, decidedAt: null }
+      : seed.approval,
     target: seed.target,
     result: normalizedResult(resultInput),
     preparedAt: seed.preparedAt,
@@ -784,7 +790,8 @@ export async function executePreparedAction(input: ExecutePreparedActionInput): 
   if (input.adapter.capability !== "atomic-compare-and-act/v1") {
     throw new ContractError("adapter_not_atomic", "Adapter does not declare atomic compare-and-act support");
   }
-  const now = input.now ?? new Date();
+  const startedAt = Date.now();
+  const now = input.now ?? new Date(startedAt);
   const approval = evaluateApproval(prepared, input.decision, now);
   const seed: ReceiptSeedV1 = Object.freeze({
     schemaVersion: "browser-action-claim/v1",
@@ -803,6 +810,16 @@ export async function executePreparedAction(input: ExecutePreparedActionInput): 
       status: "blocked",
       errorCode: approval.blockCode,
     }) };
+  }
+
+  // Claim persistence may outlast the approval; check immediately before the adapter.
+  const executionNow = new Date(now.getTime() + Date.now() - startedAt);
+  const clockRolledBack = executionNow < now;
+  if (clockRolledBack || executionNow > new Date(prepared.expiresAt)) {
+    return { kind: "recorded", receipt: await input.ledger.finalize(claim.handle, {
+      status: "blocked",
+      errorCode: clockRolledBack ? "clock_invalid" : "approval_expired",
+    }, isoNow(new Date(Math.max(executionNow.getTime(), Date.parse(seed.claimedAt))))) };
   }
 
   let rawActionResult: unknown;

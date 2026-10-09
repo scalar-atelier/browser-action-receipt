@@ -256,7 +256,13 @@ export function buildReceipt(
     operationId: seed.operationId,
     action: seed.action,
     riskClass: seed.riskClass,
-    approval: seed.approval,
+    // A valid claim can expire (or lose its clock) before any adapter is invoked.
+    approval: seed.approval.decision === "approved" && resultInput.status === "blocked"
+      && ["approval_expired", "clock_invalid"].includes(resultInput.errorCode ?? "")
+      ? resultInput.errorCode === "approval_expired"
+        ? { ...seed.approval, decision: "expired" as const }
+        : { ...seed.approval, decision: "invalid" as const, channel: null, decidedAt: null }
+      : seed.approval,
     target: seed.target,
     result,
     preparedAt: seed.preparedAt,

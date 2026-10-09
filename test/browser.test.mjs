@@ -141,3 +141,31 @@ test("browser entry blocks denial and target changes before an external action",
   assert.equal(changed.receipt.result.status, "aborted_target_changed");
   assert.equal(externalActions, 0);
 });
+
+for (const clockRollback of [false, true]) test(`browser time boundary while claiming blocks the adapter (rollback: ${clockRollback})`, async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: BASE_TIME.getTime() + 2_000 });
+  const { observation, prepared } = await fixture("00000000-0000-4000-8000-000000000204");
+  const store = new MemoryStore();
+  const claim = store.claim.bind(store);
+  store.claim = async (seed) => {
+    const result = await claim(seed);
+    if (clockRollback) t.mock.timers.setTime(BASE_TIME.getTime() - 1);
+    else t.mock.timers.tick(121_000);
+    return result;
+  };
+  let calls = 0;
+  const outcome = await executePreparedAction({
+    prepared,
+    decision: makeApprovalDecision(prepared.approvalRequest, "approved", { now: new Date(BASE_TIME.getTime() + 1_000) }),
+    ledger: new BrowserReceiptLedger(store),
+    adapter: {
+      capability: "atomic-compare-and-act/v1",
+      async compareAndAct() { calls++; return { status: "committed", observation }; },
+    },
+  });
+  assert.equal(calls, 0);
+  assert.equal(outcome.receipt.result.status, "blocked");
+  assert.equal(outcome.receipt.result.errorCode, clockRollback ? "clock_invalid" : "approval_expired");
+  assert.equal(outcome.receipt.approval.decision, clockRollback ? "invalid" : "expired");
+  assert.deepEqual(await verifyReceipt(outcome.receipt), outcome.receipt);
+});

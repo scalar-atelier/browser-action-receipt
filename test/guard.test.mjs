@@ -210,3 +210,32 @@ test("capture failure does not rewrite a committed action as failed", async (t) 
   assert.equal(outcome.receipt.result.evidenceErrorCode, "capture_failed");
   assert.equal(JSON.stringify(outcome.receipt).includes("raw capture"), false);
 });
+
+for (const injectedTime of [false, true]) for (const clockRollback of [false, true]) {
+  test(`time boundary during ledger claim blocks the adapter (injected time: ${injectedTime}, rollback: ${clockRollback})`, async (t) => {
+    t.mock.timers.enable({ apis: ["Date"], now: BASE_TIME.getTime() + 2_000 });
+    const persisted = await temporaryLedger(t);
+    const handle = prepared();
+    const adapter = new StableAdapter();
+    const outcome = await executePreparedAction({
+      prepared: handle,
+      decision: approved(handle),
+      adapter,
+      ...(injectedTime ? { now: secondsAfter(2) } : {}),
+      ledger: {
+        async claim(seed) {
+          const result = await persisted.claim(seed);
+          if (clockRollback) t.mock.timers.setTime(BASE_TIME.getTime() - 1);
+          else t.mock.timers.tick(121_000);
+          return result;
+        },
+        finalize: (...args) => persisted.finalize(...args),
+      },
+    });
+    assert.equal(adapter.calls, 0);
+    assert.equal(outcome.receipt.result.status, "blocked");
+    assert.equal(outcome.receipt.result.errorCode, clockRollback ? "clock_invalid" : "approval_expired");
+    assert.equal(outcome.receipt.approval.decision, clockRollback ? "invalid" : "expired");
+    assert.deepEqual(await persisted.readReceipt(handle.operationId), outcome.receipt);
+  });
+}
