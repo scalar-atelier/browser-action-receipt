@@ -1,6 +1,8 @@
 # Claims and limitations
 
-## Claims earned by v0.2.0 tests
+## Claims covered by v0.2.1 candidate source tests
+
+These claims describe the source candidate. Published npm `v0.2.0` does not include the post-claim expiry and clock-rollback checks; publication of `v0.2.1` is pending.
 
 The claim is conditional: **given a conforming atomic adapter and a trusted approval host**, the library will not ask that adapter to execute when approval is missing/invalid/expired, the operation was already claimed, or the adapter reports that the prepared DOM target changed. Every v0.1 action requires approval; risk labels never bypass it.
 

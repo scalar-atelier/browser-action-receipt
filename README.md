@@ -4,7 +4,7 @@
 
 `browser-action-receipt` is a small TypeScript trust primitive for DOM-target browser actions. It binds one prepared action, payload, target observation, and approval decision; claims the operation once; delegates one atomic compare-and-act call; and writes a privacy-minimal terminal receipt.
 
-**Status:** `v0.2.0`. It is not a security boundary by itself.
+**Status:** `v0.2.1` release candidate; npm latest remains `v0.2.0` until publication. It is not a security boundary by itself.
 
 ## What it does
 

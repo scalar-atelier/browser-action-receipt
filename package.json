@@ -1,6 +1,6 @@
 {
   "name": "@scalar-atelier/browser-action-receipt",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Fail-closed approval-to-browser-action binding with privacy-minimal receipts.",
   "publishConfig": {
     "access": "public"
